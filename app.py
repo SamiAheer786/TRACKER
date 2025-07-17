@@ -3,29 +3,37 @@ from auth import login
 from student_portal import show_student_portal
 from supervisor_portal import show_supervisor_portal
 
-st.set_page_config(page_title="FYP Tracker", layout="wide")
+# --- Session Initialization ---
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+    st.session_state.role = None
 
-if "role" not in st.session_state:
-    st.title("Login Portal")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
+# --- Login Page ---
+if not st.session_state.logged_in:
+    st.title("Login Page")
+
+    username = st.text_input("Username").strip()
+    password = st.text_input("Password", type="password").strip()
 
     if st.button("Login"):
-        role = login(username.strip(), password.strip())
+        role = login(username, password)
         if role:
-            st.session_state["role"] = role
-            st.experimental_rerun()
+            st.session_state.logged_in = True
+            st.session_state.role = role
+            st.success(f"Logged in as {role}")
+            st.experimental_rerun()  # rerun after login only
         else:
             st.error("Invalid credentials")
 
+# --- Role-based Redirection ---
 else:
-    st.sidebar.success(f"Logged in as {st.session_state['role']}")
+    st.sidebar.title("Menu")
+    if st.sidebar.button("Logout"):
+        st.session_state.logged_in = False
+        st.session_state.role = None
+        st.experimental_rerun()
 
-    if st.session_state["role"] == "Student":
+    if st.session_state.role == "Student":
         show_student_portal()
-
-    elif st.session_state["role"] == "Supervisor":
+    elif st.session_state.role == "Supervisor":
         show_supervisor_portal()
-
-    else:
-        st.warning("Unknown role. Please contact admin.")
