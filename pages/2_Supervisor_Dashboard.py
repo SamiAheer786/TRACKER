@@ -1,28 +1,21 @@
 import streamlit as st
 import pandas as pd
-from utils import load_data, init_data_file
+from utils import get_all_data
 
-init_data_file()
+if "role" not in st.session_state or st.session_state.role != "Supervisor":
+    st.warning("Access denied.")
+    st.stop()
 
-st.title("📊 Supervisor Dashboard")
+st.title("🧑‍🏫 Supervisor Dashboard")
 
-df = load_data()
+data = get_all_data()
 
-if df.empty:
-    st.warning("No student data submitted yet.")
-else:
-    st.subheader("📄 Project Submissions")
-    st.dataframe(df)
+st.dataframe(data)
 
-    st.subheader("🚩 Overdue Projects")
-    overdue = df[df["Progress"] < 50]
-    if overdue.empty:
-        st.success("No overdue projects!")
-    else:
-        st.error("These projects are below 50% progress:")
-        st.dataframe(overdue)
-
-    st.subheader("📂 View Uploaded Files")
-    for i, row in df.iterrows():
-        st.markdown(f"**{row['Name']} – {row['Project Title']}**")
-        st.markdown(f"[Download File]({row['File']})")
+# Download links for files
+st.markdown("### Downloadable Files")
+for index, row in data.iterrows():
+    st.markdown(f"**{row['Name']} – {row['Project']}**")
+    if row['File'] and row['File'] != "nan":
+        with open(row["File"], "rb") as f:
+            st.download_button("Download File", f, file_name=row["File"].split("/")[-1])
