@@ -1,23 +1,19 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from utils import load_data, init_data_file
+from utils import get_all_data
 
-init_data_file()
+if "role" not in st.session_state or st.session_state.role != "Supervisor":
+    st.warning("Access denied.")
+    st.stop()
 
-st.title("📈 Project Analytics")
+st.title("📊 Project Analytics")
 
-df = load_data()
-if df.empty:
-    st.warning("No data available.")
-else:
-    st.subheader("🎯 Progress Distribution")
-    fig = px.histogram(df, x="Progress", nbins=10, title="Project Progress Histogram")
-    st.plotly_chart(fig)
+data = get_all_data()
 
-    st.subheader("📊 Progress by Supervisor")
-    fig2 = px.bar(df, x="Supervisor", y="Progress", color="Name", barmode="group")
-    st.plotly_chart(fig2)
+fig = px.bar(data, x="Name", y="Progress", color="Supervisor", title="Student Progress Overview")
+st.plotly_chart(fig)
 
-    st.subheader("📌 Summary Table")
-    st.dataframe(df.groupby("Supervisor")["Progress"].mean().reset_index())
+st.markdown("### Overdue Projects")
+overdue = data[data["Progress"] < 50]
+st.dataframe(overdue)
