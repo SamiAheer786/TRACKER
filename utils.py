@@ -1,26 +1,37 @@
-import os
 import pandas as pd
+import os
 
 DATA_FILE = "data.csv"
+UPLOAD_DIR = "uploads"
 
-def init_data_file():
-    if not os.path.exists(DATA_FILE):
-        df = pd.DataFrame(columns=["Name", "Project Title", "Supervisor", "Progress", "File"])
-        df.to_csv(DATA_FILE, index=False)
+# Create upload directory if not exists
+if not os.path.exists(UPLOAD_DIR):
+    os.makedirs(UPLOAD_DIR)
 
-def load_data():
-    return pd.read_csv(DATA_FILE)
+def save_data(new_data, file_path=DATA_FILE):
+    # Load existing data if file exists, else create empty DataFrame
+    if os.path.exists(file_path):
+        df = pd.read_csv(file_path)
+    else:
+        df = pd.DataFrame()
 
-def save_data(new_data):
-    df = load_data()
-    df = df.append(new_data, ignore_index=True)
-    df.to_csv(DATA_FILE, index=False)
+    # Convert new data dictionary to DataFrame
+    new_row = pd.DataFrame([new_data])
+
+    # Concatenate with existing data
+    df = pd.concat([df, new_row], ignore_index=True)
+
+    # Save the updated data to CSV
+    df.to_csv(file_path, index=False)
+
+def load_data(file_path=DATA_FILE):
+    if os.path.exists(file_path):
+        return pd.read_csv(file_path)
+    else:
+        return pd.DataFrame()
 
 def save_uploaded_file(uploaded_file):
-    folder = "uploads"
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-    filepath = os.path.join(folder, uploaded_file.name)
-    with open(filepath, "wb") as f:
+    save_path = os.path.join(UPLOAD_DIR, uploaded_file.name)
+    with open(save_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
-    return filepath
+    return save_path
