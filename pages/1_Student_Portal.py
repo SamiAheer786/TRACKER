@@ -1,27 +1,25 @@
 import streamlit as st
-from utils import save_uploaded_file, save_data, init_data_file
+from utils import save_uploaded_file, save_data, load_data
 
-init_data_file()
+def show_student_portal():
+    st.title("Student Portal")
 
-if "role" not in st.session_state or st.session_state.role != "Student":
-    st.warning("Access denied.")
-    st.stop()
+    name = st.text_input("Enter Your Name")
+    project = st.text_input("Project Title")
+    progress = st.text_area("Progress Update")
+    supervisor = st.selectbox("Select Supervisor", ["supervisor1", "Other"])
 
-st.title("📚 Student Portal")
+    if supervisor == "Other":
+        supervisor = st.text_input("Enter Supervisor Name")
 
-name = st.text_input("Your Name")
-project = st.text_input("Project Name")
-progress = st.slider("Progress (%)", 0, 100, 10)
-supervisor = st.selectbox("Select Supervisor", ["supervisor1", "Other"])
+    uploaded_file = st.file_uploader("Upload your report")
 
-if supervisor == "Other":
-    supervisor = st.text_input("Enter Supervisor Name")
+    if st.button("Submit"):
+        if uploaded_file:
+            file_path = save_uploaded_file(uploaded_file)
+        else:
+            file_path = "No file uploaded"
 
-uploaded_file = st.file_uploader("Upload Project File", type=["pdf", "docx", "pptx"])
-
-if st.button("Submit"):
-    if name and project and uploaded_file:
-        file_path = save_uploaded_file(uploaded_file)
         save_data({
             "Name": name,
             "Project": project,
@@ -29,6 +27,21 @@ if st.button("Submit"):
             "Supervisor": supervisor,
             "File": file_path
         })
-        st.success("Project submitted successfully!")
+
+        st.success("Submitted Successfully!")
+
+    st.markdown("---")
+    st.subheader("Your Submission History")
+
+    all_data = load_data()
+    your_data = all_data[all_data["Name"] == name]
+
+    if not your_data.empty:
+        for _, row in your_data.iterrows():
+            st.write(f"Project: {row['Project']}")
+            st.write(f"Progress: {row['Progress']}")
+            if row['File'] != "No file uploaded":
+                st.markdown(f"[Download File]({row['File']})", unsafe_allow_html=True)
+            st.markdown("---")
     else:
-        st.error("Please fill all fields.")
+        st.info("No previous submissions found.")
