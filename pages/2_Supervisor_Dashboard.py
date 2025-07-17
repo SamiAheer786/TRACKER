@@ -1,21 +1,30 @@
 import streamlit as st
 import pandas as pd
-from utils import get_all_data
+from utils import load_data
 
-if "role" not in st.session_state or st.session_state.role != "Supervisor":
-    st.warning("Access denied.")
+st.title("🧑‍🏫 Supervisor Portal")
+
+if st.session_state.get("role") != "Supervisor":
+    st.warning("Access denied. Only supervisors can access this page.")
     st.stop()
 
-st.title("🧑‍🏫 Supervisor Dashboard")
+df = load_data()
 
-data = get_all_data()
+if df.empty:
+    st.info("No student data submitted yet.")
+else:
+    supervisor_name = st.session_state.username
+    supervisor_data = df[df["Supervisor"] == supervisor_name]
 
-st.dataframe(data)
+    st.subheader("Student Submissions")
+    st.dataframe(supervisor_data)
 
-# Download links for files
-st.markdown("### Downloadable Files")
-for index, row in data.iterrows():
-    st.markdown(f"**{row['Name']} – {row['Project']}**")
-    if row['File'] and row['File'] != "nan":
-        with open(row["File"], "rb") as f:
-            st.download_button("Download File", f, file_name=row["File"].split("/")[-1])
+    for i, row in supervisor_data.iterrows():
+        if row["File"]:
+            with open(row["File"], "rb") as f:
+                st.download_button(
+                    label=f"Download File for {row['Name']}",
+                    data=f,
+                    file_name=row["File"].split("/")[-1],
+                    mime="application/octet-stream"
+                )
