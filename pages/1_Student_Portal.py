@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from utils import save_uploaded_file, save_data, init_data_file
+from utils import save_uploaded_file, save_data
 
 init_data_file()
 
