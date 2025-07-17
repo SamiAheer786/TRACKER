@@ -21,17 +21,16 @@ if not st.session_state.logged_in:
             st.session_state.logged_in = True
             st.session_state.role = role
             st.success(f"Logged in as {role}")
-            st.experimental_rerun()  # rerun after login only
         else:
             st.error("Invalid credentials")
 
 # --- Role-based Redirection ---
-else:
+if st.session_state.logged_in:
     st.sidebar.title("Menu")
     if st.sidebar.button("Logout"):
         st.session_state.logged_in = False
         st.session_state.role = None
-        st.experimental_rerun()
+        st.experimental_rerun()  # Safe to rerun on logout
 
     if st.session_state.role == "Student":
         show_student_portal()
