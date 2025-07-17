@@ -1,15 +1,20 @@
 import streamlit as st
-from streamlit_extras.switch_page_button import switch_page
 
-st.set_page_config(page_title="🎓 Final Year Project Tracker", layout="wide")
-
+st.set_page_config(page_title="🎓 FYP Tracker", layout="centered")
 st.title("🎓 Final Year Project Tracker")
-st.markdown("""
-Welcome to the **Student–Supervisor FYP Portal**  
-Navigate through the left menu to access different features:
-- 📥 Submit or update your project details  
-- 📊 View dashboards (for supervisors)  
-- 📁 Upload your final reports  
-- 📈 Analyze progress and overdue tasks  
-- 👨‍👩‍👧 Manage student groups  
-""")
+
+st.markdown("## 🔐 Login Portal")
+
+role = st.selectbox("Select Role", ["Student", "Supervisor"])
+password = st.text_input("Enter Password", type="password")
+login_button = st.button("Login")
+
+if login_button:
+    if role == "Student" and password == "student123":
+        st.success("Login successful as Student")
+        st.switch_page("pages/1_Student_Portal.py")
+    elif role == "Supervisor" and password == "supervisor123":
+        st.success("Login successful as Supervisor")
+        st.switch_page("pages/2_Supervisor_Dashboard.py")
+    else:
+        st.error("Invalid password. Please try again.")
