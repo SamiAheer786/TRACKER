@@ -1,27 +1,29 @@
 import streamlit as st
+import pandas as pd
 from utils import load_data
-import time
 
 def show_supervisor_portal():
     st.title("Supervisor Dashboard")
-    st.markdown("Live View of Assigned Student Progress")
 
-    while True:
-        data = load_data()
-        supervisor_name = "supervisor1"  # Customize based on session if needed
-        assigned_data = data[data["Supervisor"] == supervisor_name]
+    df = load_data()
 
-        if not assigned_data.empty:
-            for i, row in assigned_data.iterrows():
-                with st.expander(f"Student: {row['Name']}"):
-                    st.write(f"Project: {row['Project']}")
-                    st.write(f"Progress: {row['Progress']}")
-                    if row["File"] != "No file uploaded":
-                        st.markdown(f"[📄 Download File]({row['File']})", unsafe_allow_html=True)
+    supervisor_name = st.text_input("Enter your name to view your assigned students")
+
+    if supervisor_name:
+        filtered_data = df[df['Supervisor'].str.lower() == supervisor_name.lower()]
+
+        if filtered_data.empty:
+            st.warning("No students assigned or submissions found.")
         else:
-            st.info("No data submitted yet.")
+            st.success(f"Showing data for Supervisor: {supervisor_name}")
+            for idx, row in filtered_data.iterrows():
+                st.write(f"### Student Name: {row['Name']}")
+                st.write(f"**Project Title:** {row['Project']}")
+                st.write(f"**Progress Update:** {row['Progress']}")
 
-        st.markdown("---")
-        st.info("Refreshing every 20 seconds...")
-        time.sleep(20)
-        st.experimental_rerun()
+                if row["File"] != "No file uploaded":
+                    st.markdown(f"[📄 Download File]({row['File']})", unsafe_allow_html=True)
+                else:
+                    st.info("No file uploaded by this student.")
+
+                st.markdown("---")
