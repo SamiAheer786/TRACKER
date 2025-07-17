@@ -16,20 +16,11 @@ def save_data(new_data):
     df = df.append(new_data, ignore_index=True)
     df.to_csv(DATA_FILE, index=False)
 
-def save_data(new_data, file_path="data.csv"):
-    import os
-    import pandas as pd
-
-    if os.path.exists(file_path):
-        df = pd.read_csv(file_path)
-    else:
-        df = pd.DataFrame()
-
-    # Convert new_data (dict) into a DataFrame
-    new_row = pd.DataFrame([new_data])
-
-    # Use concat instead of append
-    df = pd.concat([df, new_row], ignore_index=True)
-
-    df.to_csv(file_path, index=False)
-
+def save_uploaded_file(uploaded_file):
+    folder = "uploads"
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    filepath = os.path.join(folder, uploaded_file.name)
+    with open(filepath, "wb") as f:
+        f.write(uploaded_file.getbuffer())
+    return filepath
