@@ -3,27 +3,32 @@ import pandas as pd
 from utils import load_data
 
 def show_supervisor_portal():
-    st.title("Supervisor Dashboard")
+    st.title("📊 Supervisor Dashboard")
 
     df = load_data()
 
-    supervisor_name = st.text_input("Enter your name to view your assigned students")
+    if df.empty:
+        st.warning("No student submissions found.")
+        return
 
-    if supervisor_name:
-        filtered_data = df[df['Supervisor'].str.lower() == supervisor_name.lower()]
+    st.subheader("📁 All Submissions")
+    st.dataframe(df)
 
-        if filtered_data.empty:
-            st.warning("No students assigned or submissions found.")
+    st.subheader("📈 Analytics Summary")
+
+    if "Supervisor" in df.columns:
+        st.markdown("#### 👨‍🏫 Projects per Supervisor")
+        st.bar_chart(df['Supervisor'].value_counts())
+
+    if "RegNo" in df.columns:
+        st.markdown("#### 📚 Submissions by Registration Number")
+        st.line_chart(df['RegNo'].value_counts())
+
+    st.subheader("🔎 Search by Registration Number")
+    search_reg = st.text_input("Enter Reg. No to filter:")
+    if search_reg:
+        filtered = df[df['RegNo'].str.contains(search_reg, case=False, na=False)]
+        if not filtered.empty:
+            st.dataframe(filtered)
         else:
-            st.success(f"Showing data for Supervisor: {supervisor_name}")
-            for idx, row in filtered_data.iterrows():
-                st.write(f"### Student Name: {row['Name']}")
-                st.write(f"**Project Title:** {row['Project']}")
-                st.write(f"**Progress Update:** {row['Progress']}")
-
-                if row["File"] != "No file uploaded":
-                    st.markdown(f"[📄 Download File]({row['File']})", unsafe_allow_html=True)
-                else:
-                    st.info("No file uploaded by this student.")
-
-                st.markdown("---")
+            st.info("No matching record found.")
