@@ -1,4 +1,3 @@
-# auth.py
 def login(username, password):
     users = {
         "student1": {"password": "studentpass", "role": "Student"},
