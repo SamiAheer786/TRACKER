@@ -1,7 +1,7 @@
 import streamlit as st
 from auth import login
 from student_portal import show_student_portal
-from supervisor_portal import show_supervisor_portal  # If implemented
+from supervisor_portal import show_supervisor_portal
 
 st.set_page_config(page_title="FYP Tracker", layout="centered")
 
@@ -24,6 +24,11 @@ if not st.session_state.logged_in:
 else:
     st.sidebar.success(f"✅ Logged in as {st.session_state.role}")
     
+    if st.sidebar.button("Logout 🔓"):
+        st.session_state.logged_in = False
+        st.session_state.role = None
+        st.experimental_rerun()
+
     if st.session_state.role == "Student":
         show_student_portal()
     elif st.session_state.role == "Supervisor":
